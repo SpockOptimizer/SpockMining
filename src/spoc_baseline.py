@@ -1,3 +1,5 @@
+''' Base source code of SpOC Mining ESA Challenge
+    from: https://optimize.esa.int/challenge/spoc-mining/p/mine-the-belt'''
 import numpy as np
 import pykep as pk
 
@@ -20,13 +22,13 @@ MS = 8.98266512e-2 * SM
 MU_TRAPPIST = G * MS
 
 # DV per fuel [m/s]
-DV_per_fuel = 10000
+DV_PER_FUEL = 10000
 
 # Maximum time to fully mine an asteroid
 TIME_TO_MINE_FULLY = 30
 
 # Loading the asteroid data
-data = np.loadtxt("./data/spoc/mining/candidates.txt")
+data = np.loadtxt("../data/candidates.txt")
 asteroids = []
 for line in data:
     p = pk.planet.keplerian(
@@ -48,16 +50,21 @@ for line in data:
     asteroids.append(p)
 
 # And asteroids' masses and material type
-asteroid_masses = data[:, -2]
-asteroid_materials = data[:, -1].astype(int)
+asteroidMasses = data[:, -2]
+asteroidMaterials = data[:, -1].astype(int)
 
 
-def convert_to_chromosome(solution, check_correctness=True):
-    """Convert a solution to a fixed-length chromosome to be compatible with the optimize and pygmo framework.
+def convert_to_chromosome(solution, checkCorrectness=True):
+    """Convert a solution to a fixed-length chromosome to be compatible with
+       the optimize and pygmo framework.
 
     Args:
-        solution (list or np.array): The solution to be converted. Has to have format [t_arrival_0, ..., t_arrival_n, t_mining_0, ..., t_mining_n, ast_id_0, ..., ast_id_n]
-        check_correctness (bool): If True, the function will check if the solution fulfills some validity checks (unique asteroids, solution length).
+        solution (list or np.array): The solution to be converted. Has to have
+        format [t_arrival_0, ..., t_arrival_n, t_mining_0, ..., t_mining_n,
+        ast_id_0, ..., ast_id_n]
+        checkCorrectness (bool): If True, the function will check if the
+        solution fulfills some validity checks (unique asteroids,
+        solution length).
 
     Returns:
         np.array: The chromosome as required by optimize / pygmo.
@@ -66,10 +73,11 @@ def convert_to_chromosome(solution, check_correctness=True):
     ast_ids = solution[2 * N :]  # ids of the visited asteroids
 
     # Check if the solution is valid
-    if check_correctness:
+    if checkCorrectness:
         assert (
             len(solution) % 3 == 0
-        ), "Solution must be a multiple of 3 containing asteroid id, arrival time and time to mine. for each visit."
+        ), '''Solution must be a multiple of 3 containing asteroid id, arrival
+        time and time to mine. for each visit.'''
 
         assert (
             len(set(ast_ids)) - len(ast_ids) == 0
@@ -79,7 +87,8 @@ def convert_to_chromosome(solution, check_correctness=True):
     # add the asteroids to the chromosome that are not in the solution
     chromosome = np.zeros(30000, dtype=np.float64)
 
-    # Set placeholder values for mining times and arrival times for irrelevant chromosome entries
+    # Set placeholder values for mining times and arrival times for
+    # irrelevant chromosome entries
     chromosome[N:10000] = 0
     chromosome[10000 + N : 20000] = 0
 
@@ -91,30 +100,34 @@ def convert_to_chromosome(solution, check_correctness=True):
     chromosome[20000 : 20000 + N] = ast_ids
 
     # Add the asteroids that are not in the solution.
-    # There is the potential of a very rare edgecase where by conincidence the next
-    # asteroid added this way could still be visited but this is excessively unlikely
-    ast_not_in_solution = set(np.arange(10000)).symmetric_difference(set(ast_ids))
+    # There is the potential of a very rare edgecase where by conincidence the
+    # next asteroid added this way could still be visited but this is
+    # excessively unlikely
+    ast_not_in_solution =\
+        set(np.arange(10000)).symmetric_difference(set(ast_ids))
     chromosome[20000 + N :] = np.array(list(ast_not_in_solution))
 
     return chromosome
 
 
-class belt_mining_udp:
+class BeltMiningUdp:
     """
     pygmo User Defined Problem (UDP) describing the optimization problem.
-    https://esa.github.io/pygmo2/tutorials/coding_udp_simple.html explains what more details on UDPs.
+    https://esa.github.io/pygmo2/tutorials/coding_udp_simple.html explains
+    what more details on UDPs.
     """
 
-    def __init__(self, mission_window):
+    def __init__(self, missionWindow):
         """Initialize the UDP.
 
         Args:
-            mission_window (list [float, float]): Bounds on the overall mission in days.
+            missionWindow (list [float, float]): Bounds on the overall
+            mission in days.
         """
         self.asteroids = asteroids
-        self.asteroid_masses = asteroid_masses
-        self.asteroid_materials_types = asteroid_materials
-        self.mission_window = mission_window
+        self.asteroidMasses = asteroidMasses
+        self.asteroidMaterialsTypes = asteroidMaterials
+        self.missionWindow = missionWindow
         self.n = len(self.asteroids)
         self.MU = MU_TRAPPIST
 
@@ -124,8 +137,9 @@ class belt_mining_udp:
         Returns:
             Tuple of lists: bounds for the decision variables.
         """
-        lb = [self.mission_window[0]] * self.n + [1] * self.n + [0] * self.n
-        ub = [self.mission_window[1]] * self.n + [60] * self.n + [self.n - 1] * self.n
+        lb = [self.missionWindow[0]] * self.n + [1] * self.n + [0] * self.n
+        ub = [self.missionWindow[1]] * self.n + [60] * self.n + [self.n - 1] *\
+             self.n
         return (lb, ub)
 
     def get_nix(self):
@@ -142,7 +156,8 @@ class belt_mining_udp:
         Returns:
             int: number of inequality constraints.
         """
-        # Inequality constraints are only set to all visiting epochs (except the first)
+        # Inequality constraints are only set to all visiting epochs
+        # (except the first)
         return self.n - 1
 
     def get_nec(self):
@@ -151,7 +166,8 @@ class belt_mining_udp:
         Returns:
             int: number of equality constraints.
         """
-        # The only equality constraint is that each asteroid must be in the list exactly once
+        # The only equality constraint is that each asteroid must be in
+        # the list exactly once
         return 1
 
     def fitness(self, x, verbose=False):
@@ -164,15 +180,21 @@ class belt_mining_udp:
         Returns:
             float: Fitness of the chromosome.
         """
-        fuel = 1  # fuel level of the ship, cannot go below 0 or we abort
-        visited = 0  # viable number of visited asteroids, will be computed
-        n = len(x) // 3  # number of asteroids in chromosome
-        time_at_arrival = x[:n]  # time at arrival of each asteroid in days
-        time_spent_mining = x[n : 2 * n]  # how many days spent mining each asteroid
-        material_collected = [0] * 4  # last is fuel and will be disregarded for score
+        # fuel level of the ship, cannot go below 0 or we abort
+        fuel = 1
+        # viable number of visited asteroids, will be computed
+        visited = 0
+        # number of asteroids in chromosome
+        n = len(x) // 3
+        # time at arrival of each asteroid in days
+        time_at_arrival = x[:n]
+        # how many days spent mining each asteroid
+        time_spent_mining = x[n : 2 * n]
+        # last is fuel and will be disregarded for score
+        material_collected = [0] * 4
         ast_ids = x[2 * n :]  # ids of the visited asteroids
         if verbose:
-            print(f"ID\tt0\tFuel \tDV \t Material ID \t Tank \t \t\tScore")
+            print("ID\tt0\tFuel \tDV \t Material ID \t Tank \t \t\tScore")
 
         # Lets compute the fitness
         for i in range(1, n):
@@ -187,13 +209,16 @@ class belt_mining_udp:
             #####################################################
 
             # Break as soon as we exceed mission window
-            if time_at_arrival[i] - time_at_arrival[0] > self.mission_window[1]:
+            if time_at_arrival[i] - time_at_arrival[0] > self.missionWindow[1]:
                 if verbose:
                     print("Mission window exceeded")
                 break
 
-            # Also break if the time of flight is too short (avoids singular lambert solutions)
-            tof = time_at_arrival[i] - time_at_arrival[i - 1] - time_spent_mining[i - 1]
+            # Also break if the time of flight is too short (avoids singular
+            # lambert solutions)
+            tof = time_at_arrival[i] -\
+                  time_at_arrival[i - 1] -\
+                  time_spent_mining[i - 1]
             if tof < 0.1:
                 if verbose:
                     print("Time of flight too short or reached of chain.")
@@ -201,7 +226,9 @@ class belt_mining_udp:
 
             # Compute the ephemeris of the asteroid we are departing
             r1, v1 = self.asteroids[previous_ast_id].eph(
-                T_START.mjd2000 + time_at_arrival[i - 1] + time_spent_mining[i - 1]
+                T_START.mjd2000 +\
+                time_at_arrival[i - 1] +\
+                time_spent_mining[i - 1]
             )
 
             # Compute the ephemeris of the next target asteroid
@@ -211,8 +238,12 @@ class belt_mining_udp:
 
             # Solve the lambert problem for this flight
             l = pk.lambert_problem(
-                r1=r1, r2=r2, tof=tof * pk.DAY2SEC, mu=self.MU, cw=False, max_revs=0
-            )
+                r1=r1,
+                r2=r2,
+                tof=tof * pk.DAY2SEC,
+                mu=self.MU,
+                cw=False,
+                max_revs=0)
 
             # Compute the delta-v necessary to go there and match its velocity
             DV1 = [a - b for a, b in zip(v1, l.get_v1()[0])]
@@ -220,7 +251,7 @@ class belt_mining_udp:
             DV = np.linalg.norm(DV1) + np.linalg.norm(DV2)
 
             # Compute fuel used for this transfer and update ship fuel level
-            fuel = fuel - DV / DV_per_fuel
+            fuel = fuel - DV / DV_PER_FUEL
 
             # Break if we ran out of fuel during this transfer
             if fuel < 0:
@@ -235,27 +266,32 @@ class belt_mining_udp:
             #####################################################
 
             # Get material of the asteroid we are visiting
-            mat_idx = self.asteroid_materials_types[current_ast_id]
+            mat_idx = self.asteroidMaterialsTypes[current_ast_id]
 
             # Collect as much material as is there or we have time to
             material_collected[mat_idx] += np.minimum(
-                self.asteroid_masses[current_ast_id],
+                self.asteroidMasses[current_ast_id],
                 time_spent_mining[i] / TIME_TO_MINE_FULLY,
             )
 
             # If this is a fuel asteroid, we add it to the fuel
             if mat_idx == 3:
                 fuel_found = np.minimum(
-                    self.asteroid_masses[current_ast_id],
+                    self.asteroidMasses[current_ast_id],
                     time_spent_mining[i] / TIME_TO_MINE_FULLY,
                 )
                 fuel = np.minimum(1.0, fuel + fuel_found)
 
             if verbose:
-                tank = f"{material_collected[0]:.2f}|{material_collected[1]:.2f}|{material_collected[2]:.2f}"
+                tank = f"{material_collected[0]:.2f}|\
+                       {material_collected[1]:.2f}|\
+                       {material_collected[2]:.2f}"
                 score = np.min(material_collected[:3])
                 print(
-                    f"{current_ast_id}\t{time_at_arrival[i]:<4.2f}\t{fuel:<7.2f}\t{DV:<8.2f}\t{mat_idx}\t {tank}\t\t{score:.2f}"
+                    f"{current_ast_id}\t{time_at_arrival[i]:<4.2f}\
+                     \t{fuel:<7.2f}\
+                     \t{DV:<8.2f}\
+                     \t{mat_idx}\t {tank}\t\t{score:.2f}"
                 )
 
             visited = visited + 1
@@ -267,15 +303,18 @@ class belt_mining_udp:
         # Now the constraints
         # The visited asteroid ids must all be different (equality)
         ec = len(set(ast_ids[:visited])) - len(ast_ids[:visited])
-        # The visiting epoch must be after the previous visiting epoch plus the mining time (inequalities)
+        # The visiting epoch must be after the previous visiting epoch plus the
+        # mining time (inequalities)
         ic = [0] * (n - 1)
         for i in range(1, visited):
             ic[i] = (
-                time_at_arrival[i - 1] + time_spent_mining[i - 1] - time_at_arrival[i]
+                time_at_arrival[i - 1] +\
+                time_spent_mining[i - 1] -\
+                time_at_arrival[i]
             )
         return [obj] + [ec] + ic
 
-    def pretty(self, x):
+    def pretty(self, chromosome):
         """Pretty print the chromosome.
 
         Args:
@@ -284,7 +323,7 @@ class belt_mining_udp:
         Returns:
             str: Pretty print of the chromosome.
         """
-        self.fitness(x, True)
+        self.fitness(chromosome, True)
 
 
-udp = belt_mining_udp([0, 1827.0])
+udp = BeltMiningUdp([0, 1827.0])
