@@ -1,6 +1,7 @@
 # SpockMining
 
-![](https://api.optimize.esa.int/media/images/6cbf5b2f6921469d8d8a28f29345a248.large.jpeg)
+![6cbf5b2f6921469d8d8a28f29345a248 large](https://user-images.githubusercontent.com/55914877/162574478-3efc0658-084e-49a7-9656-7d0fc39585f5.jpeg)
+
 
 ## Summary
 The _Advanced Concepts Team_ (ACT) from _European Space Agency_ (ESA) partners with _Genetic and Evolutionary Computation Conference_ (GECCO) to propose a set of competitions.
