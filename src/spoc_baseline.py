@@ -289,10 +289,13 @@ class BeltMiningUdp:
                 propellant = np.minimum(1.0, propellant + propellant_found)
 
             if verbose:
-                tank = f"{material_prepared[0]:.2f}|{material_prepared[1]:.2f}|{material_prepared[2]:.2f}"
+                tank = f"{material_prepared[0]:.2f}|{material_prepared[1]:.2f}|\
+                    {material_prepared[2]:.2f}"
                 score = np.min(material_prepared[:3])
                 print(
-                    f"{current_ast_id}\t{time_at_arrival[i]:<4.2f}\t{propellant:<14.2f}\t{DV:<8.2f}\t{mat_idx}\t {tank}\t\t{score:.2f}"
+                    f"{current_ast_id}\t{time_at_arrival[i]:<4.2f}\
+                    \t{propellant:<14.2f}\t{DV:<8.2f}\t{mat_idx}\t {tank}\
+                    \t\t{score:.2f}"
                 )
 
             visited = visited + 1
@@ -428,9 +431,11 @@ class BeltMiningUdp:
             # fmt:off
             plt.vlines(time_at_arrival[idx],0,material_prepared_at_t[idx][0],
                 color="red",lw=lw)
-            plt.vlines(time_at_arrival[idx] + 3,0,material_prepared_at_t[idx][1],
+            plt.vlines(time_at_arrival[idx] +\
+                 3,0,material_prepared_at_t[idx][1],
                 color="green",lw=lw)
-            plt.vlines(time_at_arrival[idx] + 6,0,material_prepared_at_t[idx][2],
+            plt.vlines(time_at_arrival[idx] +\
+                 6,0,material_prepared_at_t[idx][2],
                 color="blue",lw=lw)
             plt.vlines(time_at_arrival[idx] - 3,0,propellant_at_time[idx],
                 color="black",lw=lw)
