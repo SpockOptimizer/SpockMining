@@ -456,5 +456,4 @@ class BeltMiningUdp:
 
 udp = BeltMiningUdp([0, 1827.0])
 result = udp.example()
-udp.plot(result)
 udp.pretty(result)

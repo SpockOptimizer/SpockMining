@@ -31,3 +31,7 @@ jobs:
       run: |
         # Set a score of 5 to avoid error into CI from base code source
         pylint src/*.py --reports=no --rcfile=.pylintrc --fail-under 5
+    - name: Execute source code base
+      run: |
+        # Show table of results of base source code execution
+        python src/spoc_baseline.py
