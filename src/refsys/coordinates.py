@@ -36,18 +36,7 @@ Functions contained:
 import numpy as np
 
 # Own Libs
-
-
-#######################################################################
-
-
-#######################################################################
-# Constants area
-#######################################################################
-
-# Eccentric anomaly constants
-MAX_ITER_E = 15
-EPSILON_E = 1e-10
+import constants
 
 
 #######################################################################
@@ -142,17 +131,17 @@ def mean_to_eccentric(ecc: np.ndarray, meanAnomaly: np.ndarray) -> np.ndarray:
     eccAnomaly = meanAnomaly
     count = 0
 
-    while count < MAX_ITER_E:
+    while count < constants.MAX_ITER_E:
         oldEccAnomaly = eccAnomaly
 
         eccAnomaly = \
             eccAnomaly - (eccAnomaly - ecc*np.sin(eccAnomaly) - meanAnomaly)\
             / (1 - ecc*np.cos(eccAnomaly))
 
-        if count > MAX_ITER_E:
+        if count > constants.MAX_ITER_E:
             return eccAnomaly
 
-        if np.all((eccAnomaly - oldEccAnomaly) <= EPSILON_E):
+        if np.all((eccAnomaly - oldEccAnomaly) <= constants.EPSILON_E):
             return eccAnomaly
 
         count += 1
