@@ -36,7 +36,7 @@ Functions contained:
 import numpy as np
 
 # Own Libs
-import constants
+import src.constants as constants
 
 
 #######################################################################
