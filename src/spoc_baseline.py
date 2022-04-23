@@ -3,31 +3,14 @@
 import numpy as np
 import pykep as pk
 import matplotlib.pyplot as plt
-
+import constants
 ################
 ### Constants
 ################
 
 # Start and end epochs
-T_START = pk.epoch_from_iso_string("30190302T000000")
-T_END = pk.epoch_from_iso_string("30240302T000000")
-
-# Cavendish constant (m^3/s^2/kg)
-G = 6.67430e-11
-
-# Sun_mass (kg)
-SM = 1.989e30
-
-# Mass and Mu of the Trappist-1 star
-MS = 8.98266512e-2 * SM
-MU_TRAPPIST = G * MS
-
-# DV per propellant [m/s]
-DV_PER_PROPELLANT = 10000
-
-# Maximum time to fully mine an asteroid
-TIME_TO_MINE_FULLY = 30
-
+T_START = pk.epoch_from_iso_string(constants.ISO_T_START)
+T_END = pk.epoch_from_iso_string(constants.ISO_T_END)
 # Loading the asteroid data
 data = np.loadtxt("data/candidates.txt")
 asteroids = []
@@ -42,8 +25,8 @@ for line in data:
             line[5],
             line[6],
         ),
-        MU_TRAPPIST,
-        G * line[7],  # these variable are not relevant for this problem
+        constants.MU_TRAPPIST,
+        constants.G * line[7],  # these variable are not relevant for this problem
         1,  # these variable are not relevant for this problem
         1.1,  # these variable are not relevant for this problem
         "Asteroid " + str(int(line[0])),
@@ -130,7 +113,7 @@ class BeltMiningUdp:
         self.asteroidMaterialsTypes = asteroidMaterials
         self.missionWindow = missionWindow
         self.n = len(self.asteroids)
-        self.MU = MU_TRAPPIST
+        self.MU = constants.MU_TRAPPIST
 
     def get_bounds(self):
         """Get bounds for the decision variables.
@@ -256,7 +239,7 @@ class BeltMiningUdp:
 
             # Compute propellant used for this transfer and update ship
             # propellant level
-            propellant = propellant - DV / DV_PER_PROPELLANT
+            propellant = propellant - DV / constants.DV_PER_PROPELLANT
 
             # Break if we ran out of propellant during this transfer
             if propellant < 0:
@@ -276,7 +259,7 @@ class BeltMiningUdp:
             # Prepare as much material as is there or we have time to
             material_prepared[mat_idx] += np.minimum(
                 self.asteroidMasses[current_ast_id],
-                time_spent_preparing[i] / TIME_TO_MINE_FULLY,
+                time_spent_preparing[i] / constants.TIME_TO_MINE_FULLY,
             )
             material_prepared_at_t.append(material_prepared.copy())
 
@@ -284,7 +267,7 @@ class BeltMiningUdp:
             if mat_idx == 3:
                 propellant_found = np.minimum(
                     self.asteroidMasses[current_ast_id],
-                    time_spent_preparing[i] / TIME_TO_MINE_FULLY,
+                    time_spent_preparing[i] / constants.TIME_TO_MINE_FULLY,
                 )
                 propellant = np.minimum(1.0, propellant + propellant_found)
 
