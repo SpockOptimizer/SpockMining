@@ -72,7 +72,7 @@ class Asteroid:
             Asteroid data
 
         """
-        self.ateroidId = asteroidData[0]
+        self.asteroidId = asteroidData[0]
         self.keplerianElements = [asteroidData[1],
                                    asteroidData[2],
                                    asteroidData[3],
