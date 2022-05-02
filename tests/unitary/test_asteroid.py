@@ -94,3 +94,13 @@ def test_parse_asteroid_data():
     assert asteroid.keplerianElements == expectedKeplerianElements
     assert asteroid.normalizedMass == data[7]
     assert asteroid.materialType == "Gold"
+
+    # Test coordinates at t0
+    expectedX = -18077450527.292923
+    expectedY = 22304245037.175278
+    expectedZ = -2752170398.901616
+
+    x,y,z = asteroid.get_coordinates()
+    assert x == expectedX
+    assert y == expectedY
+    assert z == expectedZ
