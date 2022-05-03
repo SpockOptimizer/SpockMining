@@ -44,7 +44,7 @@ class Asteroid:
 
     Attributes
     ----------
-    asteroidDaa : list
+    asteroidData : list
         Asteroid data
 
     Methods
@@ -59,6 +59,14 @@ class Asteroid:
         """
         Initialize asteroid object
         """
+
+        # Initialize Asteroid attributes
+        self.asteroidId = None
+        self.keplerianElements = []
+        self.planetObject = None
+        self.normalizedMass = None
+        self.materialType = None
+
         self.parse_asteroid_data(asteroidData)
 
     def parse_asteroid_data(self,
@@ -68,6 +76,8 @@ class Asteroid:
 
         Parameters
         ----------
+        self: Asteroid
+            Asteroid object
         asteroidData : list
             Asteroid data
 

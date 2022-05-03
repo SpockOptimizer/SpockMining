@@ -109,7 +109,7 @@ def plotting_zenith_by_material(asteroidList: list,
                                 alpha: float = 0.5,
                                 size: int = 5):
     """
-    Plot asteroids by material type
+    Zenith asteroids by material type
 
     Parameters
     ----------
@@ -197,13 +197,13 @@ def plot_asteroids(asteroidList: list,
                                    color='c')
 
     handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
+    byLabel = dict(zip(labels, handles))
 
     # Set title
     ax.title.set_text("Asteroids")
 
     # Set legend box below the plot
-    ax.legend(by_label.values(), by_label.keys(),
+    ax.legend(byLabel.values(), byLabel.keys(),
                 loc='lower left',
                 bbox_to_anchor=(0, -0.1, 1, -0.1),
                 ncol=5,
@@ -261,7 +261,7 @@ def plot_zenith_asteroids(asteroidList: list,
 
     # Avoid duplicated legend
     handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
+    byLabel = dict(zip(labels, handles))
 
     # Set aspect ratio to 1:1
     ax.set_aspect('equal')
@@ -274,7 +274,7 @@ def plot_zenith_asteroids(asteroidList: list,
     ax.title.set_text("Zenith view of asteroids")
 
     # Set legend box below the plot
-    ax.legend(by_label.values(), by_label.keys(),
+    ax.legend(byLabel.values(), byLabel.keys(),
                 loc='lower left',
                 bbox_to_anchor=(0, -0.1, 1, -0.1),
                 ncol=5,
